@@ -250,9 +250,7 @@ public class VectorizedPageIterator extends BasePageIterator {
   }
 
   /**
-   * Method for reading a batch of values of TIMESTAMP_MILLIS data type. In iceberg, TIMESTAMP is
-   * always represented in micro-seconds. So we multiply values stored in millis with 1000 before
-   * writing them to the vector.
+   * Method for reading a batch of values of TIMESTAMP_MILLIS data type.
    */
   class TimestampMillisPageReader extends BasePageReader {
 

@@ -405,7 +405,7 @@ public final class VectorizedParquetDefinitionLevelReader extends BaseVectorized
     @Override
     protected void nextVal(FieldVector vector, int idx, ValuesAsBytesReader valuesReader, int typeWidth,
                            byte[] byteArray) {
-      vector.getDataBuffer().setLong((long) idx * typeWidth, valuesReader.readLong() * 1000);
+      vector.getDataBuffer().setLong((long) idx * typeWidth, valuesReader.readLong());
     }
 
     @Override
@@ -416,7 +416,7 @@ public final class VectorizedParquetDefinitionLevelReader extends BaseVectorized
         reader.timestampMillisDictEncodedReader()
             .nextBatch(vector, idx, numValuesToRead, dict, nullabilityHolder, typeWidth);
       } else if (Mode.PACKED.equals(mode)) {
-        vector.getDataBuffer().setLong((long) idx * typeWidth, dict.decodeToLong(reader.readInteger()) * 1000);
+        vector.getDataBuffer().setLong((long) idx * typeWidth, dict.decodeToLong(reader.readInteger()));
       }
     }
   }
