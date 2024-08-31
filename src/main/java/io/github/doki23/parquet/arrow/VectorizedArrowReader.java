@@ -410,7 +410,7 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
     public static class ConstantVectorReader<T> extends VectorizedArrowReader {
         private final T value;
 
-        public ConstantVectorReader(Type icebergField, T value) {
+        public ConstantVectorReader(Type type, T value) {
             super();
             this.value = value;
         }
