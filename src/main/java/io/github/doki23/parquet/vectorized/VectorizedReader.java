@@ -23,28 +23,27 @@ import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData;
 
 public interface VectorizedReader<T> {
 
-  /**
-   * Reads a batch of type @param &lt;T&gt; and of size numRows
-   *
-   * @param reuse   container for the last batch to be reused for next batch
-   * @param numRows number of rows to read
-   * @return batch of records of type @param &lt;T&gt;
-   */
-  T read(T reuse, int numRows);
+    /**
+     * Reads a batch of type @param &lt;T&gt; and of size numRows
+     *
+     * @param reuse   container for the last batch to be reused for next batch
+     * @param numRows number of rows to read
+     * @return batch of records of type @param &lt;T&gt;
+     */
+    T read(T reuse, int numRows);
 
-  void setBatchSize(int batchSize);
+    void setBatchSize(int batchSize);
 
-  /**
-   * Sets the row group information to be used with this reader
-   *
-   * @param pages               row group information for all the columns
-   * @param columnChunkMetaData {@link ColumnChunkMetaData} for the row group
-   * @param rowPosition         the row group's row offset in the parquet file
-   */
-  void setRowGroupInfo(PageReadStore pages, ColumnChunkMetaData columnChunkMetaData, long rowPosition);
+    /**
+     * Sets the row group information to be used with this reader
+     *
+     * @param pages               row group information for all the columns
+     * @param columnChunkMetaData {@link ColumnChunkMetaData} for the row group
+     */
+    void setRowGroupInfo(PageReadStore pages, ColumnChunkMetaData... columnChunkMetaData);
 
-  /**
-   * Release any resources allocated.
-   */
-  void close();
+    /**
+     * Release any resources allocated.
+     */
+    void close();
 }

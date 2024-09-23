@@ -47,6 +47,8 @@ import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.PrimitiveType;
 import org.apache.parquet.schema.Type;
 
+import java.util.Objects;
+
 /**
  * {@link VectorizedReader VectorReader(s)} that read in a batch of values into Arrow vectors. It
  * also takes care of allocating the right kind of Arrow vectors depending on the corresponding
@@ -212,7 +214,11 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
             case INT_8:
             case INT_16:
             case INT_32:
-                this.vec = arrowField.createVector(rootAlloc);
+                FieldType intType = new FieldType(
+                        arrowField.isNullable(),
+                        new ArrowType.Int(Integer.SIZE, true),
+                        arrowField.getDictionary());
+                this.vec = new Field(arrowField.getName(), intType, null).createVector(rootAlloc);
                 ((IntVector) vec).allocateNew(batchSize);
                 this.readType = ReadType.INT;
                 this.typeWidth = (int) IntVector.TYPE_WIDTH;
@@ -346,9 +352,11 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
     }
 
     @Override
-    public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData columnChunkMetaData, long rowPosition) {
+    public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData... columnChunkMetaData) {
+        Objects.requireNonNull(columnChunkMetaData, "columnChunkMetaData must not be null");
+        Preconditions.checkArgument(columnChunkMetaData.length == 1, "The length of columnChunkMetaData must be 1");
         this.dictionary = vectorizedColumnIterator.setRowGroupInfo(source.getPageReader(columnDescriptor),
-                !ParquetUtil.hasNonDictionaryPages(columnChunkMetaData));
+                !ParquetUtil.hasNonDictionaryPages(columnChunkMetaData[0]));
     }
 
     @Override
@@ -390,7 +398,7 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
         }
 
         @Override
-        public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData columnChunkMetaData, long rowPosition) {}
+        public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData... columnChunkMetaData) {}
 
         @Override
         public String toString() {
@@ -421,7 +429,7 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
         }
 
         @Override
-        public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData columnChunkMetaData, long rowPosition) {}
+        public void setRowGroupInfo(PageReadStore source, ColumnChunkMetaData... columnChunkMetaData) {}
 
         @Override
         public String toString() {

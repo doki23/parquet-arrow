@@ -429,6 +429,7 @@ public final class VectorizedParquetDefinitionLevelReader extends BaseVectorized
       ByteBuffer buffer = valuesReader.getBuffer(12).order(ByteOrder.LITTLE_ENDIAN);
       long timestampInt96 = ParquetUtil.extractTimestampInt96(buffer);
       vector.getDataBuffer().setLong((long) idx * typeWidth, timestampInt96);
+
     }
 
     @Override

@@ -21,6 +21,7 @@ package io.github.doki23.parquet.arrow;
 import com.google.common.base.Preconditions;
 import io.github.doki23.parquet.vectorized.NullabilityHolder;
 import org.apache.arrow.vector.FieldVector;
+import org.apache.arrow.vector.types.pojo.Field;
 import org.apache.parquet.column.ColumnDescriptor;
 import org.apache.parquet.column.Dictionary;
 
@@ -81,6 +82,10 @@ public class VectorHolder {
 
   public FieldVector vector() {
     return vector;
+  }
+
+  public Field field() {
+    return vector.getField();
   }
 
   public boolean isDictionaryEncoded() {
