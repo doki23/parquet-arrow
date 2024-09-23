@@ -34,13 +34,13 @@ public class VectorizedArrowReaderTest {
     try {
         MessageType schema = reader.getFileMetaData().getSchema();
         ColumnDescriptor col = schema.getColumnDescription(new String[] {"id"});
-      VectorizedArrowReader arrowReader = new VectorizedArrowReader(col, ArrowAllocation.rootAllocator(), false);
+      VectorizedArrowReader arrowReader = new VectorizedArrowReader(col, ArrowAllocation.rootAllocator(), true);
       arrowReader.setBatchSize(DEFAULT_BATCH_SIZE);
       ColumnChunkMetaData columnChunkMetaData = reader.getRowGroups()
           .get(0)
           .getColumns()
           .get(schema.getFieldIndex("id"));
-      arrowReader.setRowGroupInfo(reader.readRowGroup(0), columnChunkMetaData, 0);
+      arrowReader.setRowGroupInfo(reader.readRowGroup(0), columnChunkMetaData);
       try {
         PageReader pageReader = reader.readRowGroup(0).getPageReader(col);
         int valueCount = (int) pageReader.getTotalValueCount();
