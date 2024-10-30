@@ -11,12 +11,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ArrowParquetReaderTest {
     @Test
     public void testRead() throws IOException {
-        Path filePath = new File(getClass().getResource("/parquet-testing/data/alltypes_tiny_pages_plain.parquet")
-                .getPath()).toPath();
+        Path filePath = new File(Objects.requireNonNull(
+                getClass().getResource("/parquet-testing/data/alltypes_tiny_pages_plain.parquet")).getPath()).toPath();
         InputFile inputFile = new LocalInputFile(filePath);
         List<ColumnarBatch> columnarBatches = new ArrayList<>();
         try (ArrowParquetReader reader = new ArrowParquetReader(inputFile, 5)) {
