@@ -1,3 +1,5 @@
+import org.gradle.launcher.daemon.protocol.Build
+
 plugins {
     `java-library`
 }
@@ -28,6 +30,17 @@ dependencies {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+tasks.compileTestJava {
+    doFirst {
+        val initResult = exec {
+            commandLine("git", "submodule", "update", "--init")
+        }
+        if (initResult.exitValue != 0) {
+            throw GradleException("Failed to initialize git submodules")
+        }
     }
 }
 
