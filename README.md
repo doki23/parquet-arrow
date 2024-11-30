@@ -1,7 +1,7 @@
 # parquet-arrow
 A Parquet reader/writer implementation for Apache Arrow. It is inspired by the implementation of Apache Iceberg's parquet reader. Currently, only the reader for primitive type definition levels is implemented.
 
-This repo is still under development, and there's a bug of reading int96(timestamp) type.
+This repo is still under development.
 
 # Usage Example
 ```java

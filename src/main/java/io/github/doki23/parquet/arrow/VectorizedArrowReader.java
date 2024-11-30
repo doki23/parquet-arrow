@@ -34,6 +34,7 @@ import org.apache.arrow.vector.Float8Vector;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.TimeMicroVector;
 import org.apache.arrow.vector.TimeStampMicroVector;
+import org.apache.arrow.vector.VariableWidthVector;
 import org.apache.arrow.vector.types.FloatingPointPrecision;
 import org.apache.arrow.vector.types.pojo.ArrowType;
 import org.apache.arrow.vector.types.pojo.Field;
@@ -83,7 +84,9 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
         this.vectorizedColumnIterator = new VectorizedColumnIterator(desc, "", setArrowValidityVector);
         String fieldName = getColumnName();
         Type fieldParquetType = getParquetType();
-        this.arrowField = new SchemaConverter().fromParquet(new MessageType(fieldName, fieldParquetType))
+        // convert int96 to timestamp nanos by default
+        this.arrowField = new SchemaConverter(/*convertInt96ToArrowTimestamp*/ true)
+                .fromParquet(new MessageType(fieldName, fieldParquetType))
                 .getArrowSchema()
                 .findField(fieldName);
     }
@@ -206,7 +209,11 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
             case BSON:
                 this.vec = arrowField.createVector(rootAlloc);
                 // TODO: Possibly use the uncompressed page size info to set the initial capacity
-                vec.setInitialCapacity(batchSize * AVERAGE_VARIABLE_WIDTH_RECORD_SIZE);
+                if (vec instanceof VariableWidthVector) {
+                    ((VariableWidthVector) vec).setInitialCapacity(batchSize, AVERAGE_VARIABLE_WIDTH_RECORD_SIZE);
+                } else {
+                    vec.setInitialCapacity(batchSize);
+                }
                 vec.allocateNewSafe();
                 this.readType = ReadType.VARCHAR;
                 this.typeWidth = UNKNOWN_WIDTH;
@@ -288,14 +295,18 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
                 this.readType = ReadType.FIXED_WIDTH_BINARY;
                 this.vec = arrowField.createVector(rootAlloc);
                 int len = primitive.getTypeLength();
-                vec.setInitialCapacity(batchSize * len);
+                vec.setInitialCapacity(batchSize);
                 vec.allocateNew();
                 this.typeWidth = len;
                 break;
             case BINARY:
                 this.vec = arrowField.createVector(rootAlloc);
                 // TODO: Possibly use the uncompressed page size info to set the initial capacity
-                vec.setInitialCapacity(batchSize * AVERAGE_VARIABLE_WIDTH_RECORD_SIZE);
+                if (vec instanceof VariableWidthVector) {
+                    ((VariableWidthVector) vec).setInitialCapacity(batchSize, AVERAGE_VARIABLE_WIDTH_RECORD_SIZE);
+                } else {
+                    vec.setInitialCapacity(batchSize);
+                }
                 vec.allocateNewSafe();
                 this.readType = ReadType.VARBINARY;
                 this.typeWidth = UNKNOWN_WIDTH;
@@ -315,7 +326,7 @@ public class VectorizedArrowReader implements VectorizedReader<VectorHolder> {
                 int length = BigIntVector.TYPE_WIDTH;
                 this.readType = ReadType.TIMESTAMP_INT96;
                 this.vec = arrowField.createVector(rootAlloc);
-                vec.setInitialCapacity(batchSize * length);
+                vec.setInitialCapacity(batchSize);
                 vec.allocateNew();
                 this.typeWidth = length;
                 break;
