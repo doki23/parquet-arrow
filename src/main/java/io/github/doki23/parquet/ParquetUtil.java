@@ -79,6 +79,18 @@ public class ParquetUtil {
     return TimeUnit.DAYS.toMicros(julianDay - UNIX_EPOCH_JULIAN) + TimeUnit.NANOSECONDS.toMicros(timeOfDayNanos);
   }
 
+  /**
+   * Convert timestamp (parquet Int96) to unix epoch nanos
+   */
+  public static long extractTimestampInt96ToEpochNanos(ByteBuffer buffer) {
+    // 8 bytes (time of day nanos)
+    long timeOfDayNanos = buffer.getLong();
+    // 4 bytes(julianDay)
+    int julianDay = buffer.getInt();
+    long unixEpochDay = julianDay - UNIX_EPOCH_JULIAN;
+    return TimeUnit.DAYS.toNanos(unixEpochDay) + timeOfDayNanos;
+  }
+
   @SuppressWarnings("deprecation")
   public static boolean hasNonDictionaryPages(ColumnChunkMetaData meta) {
     EncodingStats stats = meta.getEncodingStats();

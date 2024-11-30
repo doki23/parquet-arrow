@@ -33,6 +33,7 @@ import org.apache.arrow.vector.SmallIntVector;
 import org.apache.arrow.vector.TimeMicroVector;
 import org.apache.arrow.vector.TimeStampMicroTZVector;
 import org.apache.arrow.vector.TimeStampMicroVector;
+import org.apache.arrow.vector.TimeStampNanoVector;
 import org.apache.arrow.vector.TinyIntVector;
 import org.apache.arrow.vector.ValueVector;
 import org.apache.arrow.vector.VarBinaryVector;
@@ -222,6 +223,8 @@ public class GenericArrowVectorAccessorFactory<DecimalT, Utf8StringT, ArrayT, Ch
             return new TimestampMicroTzAccessor<>((TimeStampMicroTZVector) vector);
         } else if (vector instanceof TimeStampMicroVector) {
             return new TimestampMicroAccessor<>((TimeStampMicroVector) vector);
+        } else if (vector instanceof TimeStampNanoVector) {
+            return new TimestampNanoAccessor<>((TimeStampNanoVector) vector);
         } else if (vector instanceof ListVector) {
             ListVector listVector = (ListVector) vector;
             return new ArrayAccessor<>(listVector, arrayFactorySupplier.get());
@@ -671,6 +674,22 @@ public class GenericArrowVectorAccessorFactory<DecimalT, Utf8StringT, ArrayT, Ch
         private final TimeStampMicroVector vector;
 
         TimestampMicroAccessor(TimeStampMicroVector vector) {
+            super(vector);
+            this.vector = vector;
+        }
+
+        @Override
+        public final long getLong(int rowId) {
+            return vector.get(rowId);
+        }
+    }
+
+    private static class TimestampNanoAccessor<DecimalT, Utf8StringT, ArrayT, ChildVectorT extends AutoCloseable> extends
+            ArrowVectorAccessor<DecimalT, Utf8StringT, ArrayT, ChildVectorT> {
+
+        private final TimeStampNanoVector vector;
+
+        protected TimestampNanoAccessor(TimeStampNanoVector vector) {
             super(vector);
             this.vector = vector;
         }

@@ -427,9 +427,11 @@ public final class VectorizedParquetDefinitionLevelReader extends BaseVectorized
                            byte[] byteArray) {
       // 8 bytes (time of day nanos) + 4 bytes(julianDay) = 12 bytes
       ByteBuffer buffer = valuesReader.getBuffer(12).order(ByteOrder.LITTLE_ENDIAN);
-      long timestampInt96 = ParquetUtil.extractTimestampInt96(buffer);
+      long timestampInt96 = ParquetUtil.extractTimestampInt96ToEpochNanos(buffer);
       vector.getDataBuffer().setLong((long) idx * typeWidth, timestampInt96);
-
+      if (setArrowValidityVector) {
+        BitVectorHelper.setBit(vector.getValidityBuffer(), idx);
+      }
     }
 
     @Override
